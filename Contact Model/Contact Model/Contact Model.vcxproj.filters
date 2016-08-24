@@ -23,7 +23,16 @@
     <ClCompile Include="ContactModel.cpp">
       <Filter>App</Filter>
     </ClCompile>
-    <ClCompile Include="ContactManager.cpp" />
+    <ClCompile Include="ColliderObject.cpp">
+      <Filter>App</Filter>
+    </ClCompile>
+    <ClCompile Include="ContactManager.cpp">
+      <Filter>App</Filter>
+    </ClCompile>
+    <ClCompile Include="CollideeObject.cpp">
+      <Filter>App</Filter>
+    </ClCompile>
+    <ClCompile Include="ColliderVertex.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
@@ -52,7 +61,16 @@
     <ClInclude Include="ContactModelApp.h">
       <Filter>App</Filter>
     </ClInclude>
-    <ClInclude Include="ContactManager.h" />
+    <ClInclude Include="ColliderObject.h">
+      <Filter>App</Filter>
+    </ClInclude>
+    <ClInclude Include="ContactManager.h">
+      <Filter>App</Filter>
+    </ClInclude>
+    <ClInclude Include="CollideeObject.h">
+      <Filter>App</Filter>
+    </ClInclude>
+    <ClInclude Include="ColliderVertex.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />

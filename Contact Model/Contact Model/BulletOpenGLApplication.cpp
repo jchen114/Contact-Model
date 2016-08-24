@@ -502,13 +502,13 @@ void BulletOpenGLApplication::DrawShape(btScalar *transform, const btCollisionSh
 
 }
 
-void BulletOpenGLApplication::DisplayText(float x, float y, const btVector3 &color, const char *string) {
+void DisplayText(float x, float y, const btVector3 &color, const char *string) {
 	int j = strlen(string);
 
 	glColor3f(color.x(), color.y(), color.z());
 	glRasterPos2f(x, y);
 	for (int i = 0; i < j; i++) {
-		glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, string[i]);
+		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_10, string[i]);
 	}
 }
 

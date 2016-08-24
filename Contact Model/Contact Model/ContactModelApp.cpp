@@ -25,7 +25,7 @@ ContactModelApp::ContactModelApp(ProjectionMode mode):BulletOpenGLApplication(mo
 	m_app = this;
 	m_DrawShapeCallback = std::bind(&ContactModelApp::DrawShapeCallback, this, _1, _2, _3);
 	m_DrawCallback = std::bind(&ContactModelApp::DrawCallback, this);
-	m_contactManager = new ContactManager();
+
 }
 
 void ContactModelApp::ShutdownPhysics() {
@@ -57,6 +57,8 @@ void ContactModelApp::InitializePhysics() {
 
 	m_pWorld->setInternalTickCallback(InternalPostTickCallback, 0, false);
 	m_pWorld->setInternalTickCallback(InternalPreTickCallback, 0, true);
+
+	m_pWorld->getPairCache()->setOverlapFilterCallback(ContactManager::GetInstance().GetFilterCallback());
 
 	LoadTextures();
 
@@ -94,12 +96,12 @@ void ContactModelApp::CreateGround() {
 void ContactModelApp::CreateBodies() {
 
 	// Test Collision sets
-	GameObject *collisionObject = CreateGameObject(new btBox2dShape(btVector3(2.0f, 2.0f, 0.0f)), 1.0f, btVector3(1.0f, 1.0f, 0.0f), btVector3(-3.0f, 3.0f, 0.0f));
+	GameObject *collisionObject = CreateGameObject(new btBox2dShape(btVector3(1.2f, 1.2f, 0.0f)), 1.0f, btVector3(1.0f, 1.0f, 0.0f), btVector3(-3.0f, 3.0f, 0.0f));
 
-	GameObject *nonCollisionObject = CreateGameObject(new btBox2dShape(btVector3(2.0f, 2.0f, 0.0f)), 1.0f, btVector3(1.0f, 0.0f, 1.0f), btVector3(3.0f, 3.0f, 0.0f));
+	GameObject *nonCollisionObject = CreateGameObject(new btBox2dShape(btVector3(1.2f, 1.2f, 0.0f)), 1.0f, btVector3(1.0f, 0.0f, 1.0f), btVector3(3.0f, 3.0f, 0.0f));
 
-	m_contactManager->AddObjectForCollision(collisionObject);
-	m_contactManager->AddObjectToCollideWith(m_ground);
+	ContactManager::GetInstance().AddObjectForCollision(collisionObject);
+	ContactManager::GetInstance().AddObjectToCollideWith(m_ground);
 
 }
 
@@ -154,7 +156,7 @@ void ContactModelApp::DrawShapeCallback(btScalar *transform, const btCollisionSh
 
 void ContactModelApp::DrawCallback() {
 
-	m_contactManager->DrawContactPoints();
+	ContactManager::GetInstance().DrawContactPoints();
 }
 
 void ContactModelApp::PostTickCallback(btScalar timestep) {
@@ -180,9 +182,8 @@ void ContactModelApp::PostTickCallback(btScalar timestep) {
 
 void ContactModelApp::PreTickCallback(btScalar timestep) {
 
-	btVector3 force;
-	btVector3 relPos;
-
+	ContactManager::GetInstance().Update(timestep);
+	
 }
 
 #pragma endregion DRAWING

@@ -29,11 +29,11 @@ public:
 
 	void DrawArrow(const btVector3 &pointOfContact, TranslateDirection direction);
 
-	ContactManager *m_contactManager;
-
 private:
 	GameObject *m_ground;
 	GLuint m_ground_texture;
+
+	
 
 };
 

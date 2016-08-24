@@ -154,8 +154,6 @@ protected:
 	// debug renderer
 	DebugDrawer* m_pDebugDrawer;
 
-	void DisplayText(float x, float y, const btVector3 &color, const char *string);
-
 	bool m_IsFrameRateFixed;
 	float m_RemainingTime = 0.0f;
 
@@ -167,6 +165,7 @@ void DrawPlane(const btVector3 &halfSize);
 void DrawCircle(const float &radius);
 void DrawCircle(const float &radius, const btVector3 &location, const btVector3 &color = btVector3(1.0f, 1.0f, 1.0f));
 void DrawWithTriangles(const btVector3 * vertices, const int *indices, int numberOfIndices);
+void DisplayText(float x, float y, const btVector3 &color, const char *string);
 
 static BulletOpenGLApplication *m_me;
 

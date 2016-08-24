@@ -92,6 +92,9 @@
   <ItemGroup>
     <ClInclude Include="BulletOpenGLApplication.h" />
     <ClInclude Include="CameraManager.h" />
+    <ClInclude Include="CollideeObject.h" />
+    <ClInclude Include="ColliderObject.h" />
+    <ClInclude Include="ColliderVertex.h" />
     <ClInclude Include="Constants.h" />
     <ClInclude Include="ContactManager.h" />
     <ClInclude Include="ContactModelApp.h" />
@@ -105,6 +108,9 @@
   <ItemGroup>
     <ClCompile Include="BulletOpenGLApplication.cpp" />
     <ClCompile Include="CameraManager.cpp" />
+    <ClCompile Include="CollideeObject.cpp" />
+    <ClCompile Include="ColliderObject.cpp" />
+    <ClCompile Include="ColliderVertex.cpp" />
     <ClCompile Include="Constants.cpp" />
     <ClCompile Include="ContactManager.cpp" />
     <ClCompile Include="ContactModelApp.cpp" />
