@@ -22,7 +22,7 @@ public:
 	ColliderType m_colliderType;
 	GameObject *m_object;
 
-	std::vector<ColliderVertex> m_vertices;
+	std::vector<ColliderVertex *> m_vertices;
 
 	void DrawAndLabelContactPoints();
 
@@ -30,7 +30,7 @@ public:
 
 	void CollisionDetectionUpdate(std::vector<CollideeObject> collidees);
 
-	std::vector<ColliderVertex> GetVertexPositionsFor2DBox(const btVector3 &COM, const btVector3 &halfSize);
+	std::vector<ColliderVertex *> GetVertexPositionsFor2DBox(const btVector3 &halfSize);
 	std::vector<btVector3> GetVertexVelocitiesFor2DBox(btRigidBody *body, const btVector3 &halfSize);
 
 private:

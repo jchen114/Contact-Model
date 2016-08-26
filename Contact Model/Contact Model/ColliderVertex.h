@@ -2,6 +2,7 @@
 
 #include "LinearMath\btVector3.h"
 #include "CollideeObject.h"
+#include "Constants.h"
 
 typedef enum {
 	IN_COLLISION = 0,
@@ -15,21 +16,30 @@ public:
 	~ColliderVertex();
 
 	void CollisionDetectionUpdate(std::vector<CollideeObject> objects);
-	
+
+	btScalar m_springConstant = 20.0f;
+	btScalar m_dampingConstant = 20.0f;
+
+	void DrawForce();
+	void DrawInfo(int id);
+
 private:
 
 	btVector3 m_vertexPos;
 	btVector3 m_vertexVel;
-	VertexState m_state;
-	btVector3 m_lastCollisionPoint;
-
+	VertexState m_state = NO_COLLISION;
+	btVector3 m_previousPoint;
+	btVector3 m_collisionPoint;
 	GameObject *m_object;
 	btVector3 m_offset;
+
+	btVector3 m_springForce = btVector3(0.0f, 0.0f, 0.0f);
+	btVector3 m_dampingForce = btVector3(0.0f, 0.0f, 0.0f);
 
 	void HandleBoxCollision(std::vector<std::pair<btVector3, btVector3>> planes);
 	void Handle2DBoxCollision();
 
-	void ApplyForces();
+	
 
 };
 
