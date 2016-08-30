@@ -27,6 +27,14 @@ public:
 	btVector3 GetCameraLocation();
 	void CameraManager::Reset();
 
+	float m_nearPlane;
+	float m_farPlane;
+
+	btVector3 m_cameraPosition;
+	btVector3 m_cameraTarget;
+
+	btVector3 m_upVector;
+
 protected:
 
 	void SetupPerspectiveCamera();
@@ -34,12 +42,7 @@ protected:
 	void SetupPerspectiveModelView();
 	void SetupOrthographicModelView();
 
-
-	btVector3 m_cameraPosition;
-	btVector3 m_cameraTarget;
-	float m_nearPlane;
-	float m_farPlane;
-	btVector3 m_upVector;
+	
 	float m_cameraDistance;
 	float m_cameraPitch;
 	float m_cameraYaw;

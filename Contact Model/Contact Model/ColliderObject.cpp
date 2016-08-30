@@ -52,10 +52,9 @@ void ColliderObject::CollisionDetectionUpdate(std::vector<CollideeObject> collid
 void ColliderObject::DrawAndLabelContactPoints() {
 
 	// Draw the forces present on the vertices
-	int id = 0;
 	for (auto it = m_vertices.begin(); it != m_vertices.end(); it++) {
 		ColliderVertex *vertex = *it;
-		vertex->DrawInfo(id ++);
+		vertex->DrawInfo();
 		vertex->DrawForce();
 	}
 
@@ -64,10 +63,10 @@ void ColliderObject::DrawAndLabelContactPoints() {
 std::vector<ColliderVertex*> ColliderObject::GetVertexPositionsFor2DBox( const btVector3 &halfSize) {
 
 	std::vector<ColliderVertex*> vertex_positions = {
-		new ColliderVertex(m_object, btVector3(-halfSize.x(), -halfSize.y(), 0)),
-		new ColliderVertex(m_object, btVector3(-halfSize.x(), halfSize.y(), 0)),
-		new ColliderVertex(m_object, btVector3(halfSize.x(), halfSize.y(), 0)),
-		new ColliderVertex(m_object, btVector3(halfSize.x(), -halfSize.y(), 0))
+		new ColliderVertex(m_object, btVector3(-halfSize.x(), -halfSize.y(), 0), 0),
+		new ColliderVertex(m_object, btVector3(-halfSize.x(), halfSize.y(), 0), 1),
+		new ColliderVertex(m_object, btVector3(halfSize.x(), halfSize.y(), 0), 2),
+		new ColliderVertex(m_object, btVector3(halfSize.x(), -halfSize.y(), 0), 3)
 	};
 	return vertex_positions;
 }

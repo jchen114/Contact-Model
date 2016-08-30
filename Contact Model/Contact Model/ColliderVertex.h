@@ -12,16 +12,18 @@ typedef enum {
 class ColliderVertex
 {
 public:
-	ColliderVertex(GameObject *object, const btVector3 &offset);
+	ColliderVertex(GameObject *object, const btVector3 &offset, int vid, btScalar friction = 0.4f);
 	~ColliderVertex();
 
 	void CollisionDetectionUpdate(std::vector<CollideeObject> objects);
 
 	btScalar m_springConstant = 20.0f;
 	btScalar m_dampingConstant = 20.0f;
+	btScalar m_friction;
+	int m_id;
 
 	void DrawForce();
-	void DrawInfo(int id);
+	void DrawInfo();
 
 private:
 
@@ -32,6 +34,9 @@ private:
 	btVector3 m_collisionPoint;
 	GameObject *m_object;
 	btVector3 m_offset;
+	btVector3 m_newOffset;
+	btScalar m_distanceFromCOM;
+	btScalar m_orientation;
 
 	btVector3 m_springForce = btVector3(0.0f, 0.0f, 0.0f);
 	btVector3 m_dampingForce = btVector3(0.0f, 0.0f, 0.0f);

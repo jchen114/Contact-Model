@@ -68,6 +68,45 @@ void ContactModelApp::InitializePhysics() {
 
 }
 
+void ContactModelApp::Mouse(int button, int state, int x, int y) {
+	switch (button) {
+		case 0:  { // left mouse button	
+			if (state == 0) { // button down
+				// create the picking constraint when we click the LMB
+				CreatePickingConstraint(x, y);
+			}
+			else { // button up
+				// remove the picking constraint when we release the LMB
+				RemovePickingConstraint();
+			}
+			break;
+
+		}
+	}
+}
+
+void ContactModelApp::Motion(int x, int y) {
+	// did we pick a body with the LMB?
+	if (m_pPickedBody) {
+		btGeneric6DofConstraint* pickCon = static_cast<btGeneric6DofConstraint*>(m_pPickConstraint);
+		if (!pickCon)
+			return;
+
+		// use another picking ray to get the target direction
+		btVector3 dir = GetPickingRay(x, y) - m_cameraManager->m_cameraPosition;
+		dir.normalize();
+		
+		// use the same distance as when we originally picked the object
+		dir *= m_oldPickingDist;
+		btVector3 newPivot = m_cameraManager->m_cameraPosition + dir;
+		
+		// set the position of the constraint
+		pickCon->getFrameOffsetA().setOrigin(newPivot);
+		
+	}
+}
+
+
 void ContactModelApp::LoadTextures() {
 	// Load up the textures
 	m_ground_texture = SOIL_load_OGL_texture
@@ -187,6 +226,166 @@ void ContactModelApp::PreTickCallback(btScalar timestep) {
 }
 
 #pragma endregion DRAWING
+
+#pragma region RAY_CAST
+
+btVector3 ContactModelApp::GetPickingRay(int x, int y) {
+	// calculate the field-of-view
+	float tanFov = 1.0f / m_cameraManager->m_nearPlane;
+	float fov = btScalar(2.0) * btAtan(tanFov);
+
+	// get a ray pointing forward from the 
+	// camera and extend it to the far plane
+	btVector3 rayFrom = m_cameraManager->m_cameraPosition;
+	btVector3 rayForward = (m_cameraManager->m_cameraTarget - m_cameraManager->m_cameraPosition);
+	rayForward.normalize();
+	rayForward *= m_cameraManager->m_farPlane;
+
+	// find the horizontal and vertical vectors 
+	// relative to the current camera view
+	btVector3 ver = m_cameraManager->m_upVector;
+	btVector3 hor = rayForward.cross(ver);
+	hor.normalize();
+	ver = hor.cross(rayForward);
+	ver.normalize();
+	hor *= 2.f * m_cameraManager->m_farPlane * tanFov;
+	ver *= 2.f * m_cameraManager->m_farPlane * tanFov;
+
+	// calculate the aspect ratio
+	btScalar aspect = Constants::GetInstance().GetScreenWidth() / (btScalar)Constants::GetInstance().GetScreenHeight();
+
+	// adjust the forward-ray based on
+	// the X/Y coordinates that were clicked
+	hor *= aspect;
+	btVector3 rayToCenter = rayFrom + rayForward;
+	btVector3 dHor = hor * 1.f / float(Constants::GetInstance().GetScreenWidth());
+	btVector3 dVert = ver * 1.f / float(Constants::GetInstance().GetScreenHeight());
+	btVector3 rayTo = rayToCenter - 0.5f * hor + 0.5f * ver;
+	rayTo += btScalar(x) * dHor;
+	rayTo -= btScalar(y) * dVert;
+
+	// return the final result
+	return rayTo;
+}
+
+bool ContactModelApp::Raycast(const btVector3 &startPosition, const btVector3 &direction, RayResult &output) {
+	if (!m_pWorld)
+		return false;
+
+	// get the picking ray from where we clicked
+	btVector3 rayTo = direction;
+	btVector3 rayFrom = m_cameraManager->m_cameraPosition;
+
+	// create our raycast callback object
+	btCollisionWorld::ClosestRayResultCallback rayCallback(rayFrom, rayTo);
+
+	// perform the raycast
+	m_pWorld->rayTest(rayFrom, rayTo, rayCallback);
+
+	// did we hit something?
+	if (rayCallback.hasHit())
+	{
+		// if so, get the rigid body we hit
+		btRigidBody* pBody = (btRigidBody*)btRigidBody::upcast(rayCallback.m_collisionObject);
+		if (!pBody)
+			return false;
+
+		// prevent us from picking objects 
+		// like the ground plane
+		if (pBody->isStaticObject() || pBody->isKinematicObject())
+			return false;
+
+		// set the result data
+		output.pBody = pBody;
+		output.hitPoint = rayCallback.m_hitPointWorld;
+		return true;
+	}
+
+	// we didn't hit anything
+	return false;
+}
+
+void ContactModelApp::CreatePickingConstraint(int x, int y) {
+	if (!m_pWorld)
+		return;
+
+	// perform a raycast and return if it fails
+	RayResult output;
+	if (!Raycast(m_cameraManager->m_cameraPosition, GetPickingRay(x, y), output))
+		return;
+
+	// store the body for future reference
+	m_pPickedBody = output.pBody;
+	
+	// prevent the picked object from falling asleep
+	m_pPickedBody->setActivationState(DISABLE_DEACTIVATION);
+
+	// get the hit position relative to the body we hit 
+	btVector3 localPivot = m_pPickedBody->getCenterOfMassTransform().inverse() * output.hitPoint;
+	
+	// create a transform for the pivot point
+	btTransform pivot;
+	pivot.setIdentity();
+	pivot.setOrigin(localPivot);
+
+	// create our constraint object
+	btGeneric6DofConstraint* dof6 = new btGeneric6DofConstraint(*m_pPickedBody, pivot, true);
+	bool bLimitAngularMotion = true;
+	if (bLimitAngularMotion) {
+		dof6->setAngularLowerLimit(btVector3(0, 0, 0));
+		dof6->setAngularUpperLimit(btVector3(0, 0, 0));
+	}
+
+	// define the 'strength' of our constraint (each axis)
+	float cfm = 0.0f;
+	dof6->setParam(BT_CONSTRAINT_STOP_CFM, cfm, 0);
+	dof6->setParam(BT_CONSTRAINT_STOP_CFM, cfm, 1);
+	dof6->setParam(BT_CONSTRAINT_STOP_CFM, cfm, 2);
+	dof6->setParam(BT_CONSTRAINT_STOP_CFM, cfm, 3);
+	dof6->setParam(BT_CONSTRAINT_STOP_CFM, cfm, 4);
+	dof6->setParam(BT_CONSTRAINT_STOP_CFM, cfm, 5);
+
+	// define the 'error reduction' of our constraint (each axis)
+	float erp = 0.5f;
+	dof6->setParam(BT_CONSTRAINT_STOP_ERP, erp, 0);
+	dof6->setParam(BT_CONSTRAINT_STOP_ERP, erp, 1);
+	dof6->setParam(BT_CONSTRAINT_STOP_ERP, erp, 2);
+	dof6->setParam(BT_CONSTRAINT_STOP_ERP, erp, 3);
+	dof6->setParam(BT_CONSTRAINT_STOP_ERP, erp, 4);
+	dof6->setParam(BT_CONSTRAINT_STOP_ERP, erp, 5);
+
+	// add the constraint to the world
+	m_pWorld->addConstraint(dof6, true);
+	// store a pointer to our constraint
+	m_pPickConstraint = dof6;
+	
+	// save this data for future reference
+	m_oldPickingDist = (output.hitPoint - m_cameraManager->m_cameraPosition).length();
+	
+}
+
+void ContactModelApp::RemovePickingConstraint() {
+	// exit in erroneous situations
+	if (!m_pPickConstraint || !m_pWorld)
+		return;
+
+		// remove the constraint from the world
+		m_pWorld->removeConstraint(m_pPickConstraint);
+
+		// delete the constraint object
+		delete m_pPickConstraint;
+
+		// reactivate the body
+		m_pPickedBody->forceActivationState(ACTIVE_TAG);
+		m_pPickedBody->setDeactivationTime(0.f);
+
+		// clear the pointers
+		m_pPickConstraint = 0;
+		m_pPickedBody = 0;
+
+}
+
+#pragma endregion RAY_CAST
 
 void InternalPostTickCallback(btDynamicsWorld *world, btScalar timestep) {
 	m_app->PostTickCallback(timestep);
