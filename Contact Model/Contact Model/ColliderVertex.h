@@ -17,8 +17,8 @@ public:
 
 	void CollisionDetectionUpdate(std::vector<CollideeObject> objects);
 
-	btScalar m_springConstant = 20.0f;
-	btScalar m_dampingConstant = 20.0f;
+	btScalar m_springConstant = 40.0f;
+	btScalar m_dampingConstant = 15.0f;
 	btScalar m_friction;
 	int m_id;
 
@@ -40,6 +40,11 @@ private:
 
 	btVector3 m_springForce = btVector3(0.0f, 0.0f, 0.0f);
 	btVector3 m_dampingForce = btVector3(0.0f, 0.0f, 0.0f);
+
+	btVector3 m_reactionForce = btVector3(0.0f, 0.0f, 0.0f);
+
+	float m_minAngle;
+	float m_maxAngle;
 
 	void HandleBoxCollision(std::vector<std::pair<btVector3, btVector3>> planes);
 	void Handle2DBoxCollision();

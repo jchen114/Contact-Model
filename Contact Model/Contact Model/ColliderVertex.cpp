@@ -13,6 +13,10 @@ ColliderVertex::ColliderVertex(GameObject *object, const btVector3 &offset, int 
 
 	m_friction = friction;
 	m_id = vid;
+
+	m_minAngle = -atan(m_friction);
+	m_maxAngle = atan(m_friction);
+
 }
 
 
@@ -82,7 +86,23 @@ void ColliderVertex::HandleBoxCollision(std::vector<std::pair<btVector3, btVecto
 
 		m_dampingForce = m_vertexVel * m_dampingConstant;
 
-		m_object->GetRigidBody()->applyForce(m_springForce - m_dampingForce, m_newOffset);
+		// Check reaction force for negative.
+		m_reactionForce = m_springForce - m_dampingForce;
+		m_reactionForce.y() < 0 ? m_reactionForce *= btVector3(0, 0, 0) : m_reactionForce;
+
+		// Check to see if reaction force is inside cone of friction.
+		float angle = atan(m_reactionForce.x() / m_reactionForce.y());
+		if (angle < m_minAngle) { // negative angle
+			m_reactionForce.setX(m_reactionForce.y() * tan(m_minAngle));
+			float delta_x = (m_collisionPoint.y() - m_vertexPos.y()) * tan(m_minAngle);
+			m_collisionPoint.setX(m_vertexPos.x() + delta_x);
+		}
+		if (angle > m_maxAngle) {
+			m_reactionForce.setX(m_reactionForce.y() * tan(m_maxAngle));
+			float delta_x = (m_collisionPoint.y() - m_vertexPos.y()) * tan(m_maxAngle);
+			m_collisionPoint.setX(m_vertexPos.x() + delta_x);
+		}
+		m_object->GetRigidBody()->applyForce(m_reactionForce, m_newOffset);
 	} else {
 		m_state = NO_COLLISION;
 	}
@@ -130,7 +150,7 @@ void ColliderVertex::DrawForce() {
 		glLineWidth(3.0f);
 		glBegin(GL_LINES);
 		glVertex3f(m_newOffset.x(), m_newOffset.y(), 0.1);
-		glVertex3f(m_newOffset.x() + m_springForce.x(), m_newOffset.y() + m_springForce.y(), 0.0f);
+		glVertex3f(m_newOffset.x() + m_reactionForce.x(), m_newOffset.y() + m_reactionForce.y(), 0.0f);
 		glEnd();
 		glPopMatrix();
 	}
