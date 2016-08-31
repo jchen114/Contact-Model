@@ -50,7 +50,8 @@ void ColliderVertex::CollisionDetectionUpdate(std::vector<CollideeObject> object
 		}
 			break;
 		case COLLIDEE_BOX_2D_SHAPE: {
-
+			auto planes = object.GetPlanes();
+			Handle2DBoxCollision(planes);
 		}
 			break;
 		default:
@@ -111,7 +112,50 @@ void ColliderVertex::HandleBoxCollision(std::vector<std::pair<btVector3, btVecto
 
 }
 
-void ColliderVertex::Handle2DBoxCollision() {
+void ColliderVertex::Handle2DBoxCollision(std::vector<std::pair<btVector3, btVector3>> planes) {
+	std::pair < btVector3, btVector3 > top_plane = planes.front();
+	btVector3 v1 = top_plane.first;
+	btVector3 v2 = top_plane.second;
+
+	// top plane... Assume horizontal
+	if (m_vertexPos.x() > v1.x() && m_vertexPos.x() < v2.x()
+		&& m_vertexPos.y() < v1.y())
+	{
+		if (m_state == NO_COLLISION) {
+			printf("%d, Collision happened!\n", m_id);
+			m_state = IN_COLLISION;
+			m_collisionPoint = m_previousPoint;
+		}
+		// Spring force in direction towards penetration point
+		m_springForce = m_collisionPoint - m_vertexPos;
+		m_springForce = m_springForce.normalize();
+		m_springForce = m_springForce * m_springConstant;
+
+		m_dampingForce = m_vertexVel * m_dampingConstant;
+
+		// Check reaction force for negative.
+		m_reactionForce = m_springForce - m_dampingForce;
+		m_reactionForce.y() < 0 ? m_reactionForce *= btVector3(0, 0, 0) : m_reactionForce;
+
+		// Check to see if reaction force is inside cone of friction.
+		float angle = atan(m_reactionForce.x() / m_reactionForce.y());
+		if (angle < m_minAngle) { // negative angle
+			m_reactionForce.setX(m_reactionForce.y() * tan(m_minAngle));
+			float delta_x = (m_collisionPoint.y() - m_vertexPos.y()) * tan(m_minAngle);
+			m_collisionPoint.setX(m_vertexPos.x() + delta_x);
+		}
+		if (angle > m_maxAngle) {
+			m_reactionForce.setX(m_reactionForce.y() * tan(m_maxAngle));
+			float delta_x = (m_collisionPoint.y() - m_vertexPos.y()) * tan(m_maxAngle);
+			m_collisionPoint.setX(m_vertexPos.x() + delta_x);
+		}
+		m_object->GetRigidBody()->applyForce(m_reactionForce, m_newOffset);
+	}
+	else {
+		m_state = NO_COLLISION;
+	}
+
+	m_previousPoint = m_vertexPos;
 
 }
 

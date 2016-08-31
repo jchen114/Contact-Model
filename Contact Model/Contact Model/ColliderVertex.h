@@ -47,7 +47,7 @@ private:
 	float m_maxAngle;
 
 	void HandleBoxCollision(std::vector<std::pair<btVector3, btVector3>> planes);
-	void Handle2DBoxCollision();
+	void Handle2DBoxCollision(std::vector<std::pair<btVector3, btVector3>> planes);
 
 	
 

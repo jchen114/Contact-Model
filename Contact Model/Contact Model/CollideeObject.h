@@ -25,6 +25,7 @@ public:
 private:
 
 	std::vector <std::pair<btVector3, btVector3>> HandleBoxCollidingPlanes();
+	std::vector <std::pair<btVector3, btVector3>> Handle2DBoxCollidingPlanes();
 	std::vector <std::pair<btVector3, btVector3>> m_planes;
 
 };
