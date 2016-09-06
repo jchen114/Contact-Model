@@ -122,7 +122,7 @@ void ColliderVertex::Handle2DBoxCollision(std::vector<std::pair<btVector3, btVec
 		&& m_vertexPos.y() < v1.y())
 	{
 		if (m_state == NO_COLLISION) {
-			printf("%d, Collision happened!\n", m_id);
+			//printf("%d, Collision happened!\n", m_id);
 			m_state = IN_COLLISION;
 			m_collisionPoint = m_previousPoint;
 		}

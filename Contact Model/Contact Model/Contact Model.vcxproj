@@ -123,18 +123,18 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Build\src\BulletCollision\BulletCollision.vcxproj">
-      <Project>{779fe9ee-cdde-45ca-9795-4d498eabda18}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Build\src\BulletDynamics\BulletDynamics.vcxproj">
-      <Project>{fd0a2f75-635b-4ef0-857c-4bcce0c2ce25}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Build\src\LinearMath\LinearMath.vcxproj">
-      <Project>{45af0da3-c070-4558-9ae3-8eabdc70a181}</Project>
-    </ProjectReference>
+    <Image Include="..\..\Dependencies\Resources\checkerboard.png" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="..\..\Dependencies\Resources\checkerboard.png" />
+    <ProjectReference Include="..\..\Dependencies\bullet3-2.83.7-lab\src\BulletCollision\BulletCollision.vcxproj">
+      <Project>{6ffa7fbb-82ca-482f-9ec8-1cf02bd948d6}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Dependencies\bullet3-2.83.7-lab\src\BulletDynamics\BulletDynamics.vcxproj">
+      <Project>{cd402ae5-5bea-44b0-ac87-0470879e9be5}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Dependencies\bullet3-2.83.7-lab\src\LinearMath\LinearMath.vcxproj">
+      <Project>{49c30bfe-1ddc-49ac-b898-7c0b5f550469}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

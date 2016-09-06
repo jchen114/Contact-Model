@@ -1,10 +1,13 @@
 #include "stdafx.h"
 #include "ColliderObject.h"
 
+#include "ColliderVertex.h"
+#include "CollideeObject.h"
+
 
 #pragma region INITIALIZE
 
-ColliderObject::ColliderObject(GameObject *object)
+ColliderObject::ColliderObject(GameObject *object, int numberOfVertices)
 {
 	m_object = object;
 	m_userPointer = object;
@@ -14,7 +17,7 @@ ColliderObject::ColliderObject(GameObject *object)
 	switch (m_object->GetRigidBody()->getCollisionShape()->getShapeType()) {
 	case BOX_2D_SHAPE_PROXYTYPE:
 	{
-		Initialize2DBox();
+		Initialize2DBox(numberOfVertices);
 	}
 		break;
 	default:
@@ -27,13 +30,13 @@ ColliderObject::~ColliderObject()
 {
 }
 
-void ColliderObject::Initialize2DBox() {
+void ColliderObject::Initialize2DBox(int numberOfVertices) {
 
 	const btBox2dShape *box = static_cast<const btBox2dShape*>(m_object->GetRigidBody()->getCollisionShape());
 	btVector3 halfSize = box->getHalfExtentsWithMargin();
 
 	// Get vertices in a clockwise manner.
-	m_vertices = GetVertexPositionsFor2DBox(halfSize);
+	m_vertices = GetVertexPositionsFor2DBox(halfSize, numberOfVertices);
 
 }
 
@@ -60,7 +63,7 @@ void ColliderObject::DrawAndLabelContactPoints() {
 
 }
 
-std::vector<ColliderVertex*> ColliderObject::GetVertexPositionsFor2DBox( const btVector3 &halfSize) {
+std::vector<ColliderVertex*> ColliderObject::GetVertexPositionsFor2DBox(const btVector3 &halfSize, int numberOfVertices) {
 
 	std::vector<ColliderVertex*> vertex_positions = {
 		new ColliderVertex(m_object, btVector3(-halfSize.x(), -halfSize.y(), 0), 0),
@@ -68,6 +71,14 @@ std::vector<ColliderVertex*> ColliderObject::GetVertexPositionsFor2DBox( const b
 		new ColliderVertex(m_object, btVector3(halfSize.x(), halfSize.y(), 0), 2),
 		new ColliderVertex(m_object, btVector3(halfSize.x(), -halfSize.y(), 0), 3)
 	};
+
+	// For the bottom edge.
+	float distanceBetweenVertices = halfSize.x() * 2 / (numberOfVertices - 2 + 1);
+	for (int i = 1; i < numberOfVertices - 1; i++) {
+		ColliderVertex *vert = new ColliderVertex(m_object, btVector3(-halfSize.x() + i * distanceBetweenVertices, -halfSize.y(), 0), 3 + i);
+		vertex_positions.push_back(vert);
+	}
+
 	return vertex_positions;
 }
 
